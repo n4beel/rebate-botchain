@@ -421,4 +421,45 @@ contract RebateTest is Test {
     assertEq(address(rebate).balance, uint256(nBuyers) * 2 ether);
     assertEq(address(rebate).balance, sumPending);
   }
+
+  function test_BoundaryMutantKillers() public {
+    // 1. Kill Rebate.sol:96: if (nameBytes.length == 0 || nameBytes.length > MAX_NAME_BYTES)
+    // 48-byte name must succeed, 49-byte must revert
+    string memory name48 = "123456789012345678901234567890123456789012345678";
+    vm.prank(seller);
+    uint256 id48 = rebate.list(name48, PRICE, WINDOW, 1);
+    assertEq(id48, 1);
+
+    // 2. Kill Rebate.sol:97: if (price < MIN_PRICE || price > MAX_PRICE)
+    // MAX_PRICE must succeed
+    uint128 maxP = rebate.MAX_PRICE();
+    vm.prank(seller);
+    uint256 idMaxP = rebate.list("MaxPriceItem", maxP, WINDOW, 1);
+    assertEq(idMaxP, 2);
+
+    // 3. Kill Rebate.sol:99: if (stock == 0 || stock > MAX_STOCK)
+    // MAX_STOCK must succeed
+    vm.prank(seller);
+    uint256 idMaxStock = rebate.list("MaxStockItem", PRICE, WINDOW, 1000);
+    assertEq(idMaxStock, 3);
+
+    // 4. Kill Rebate.sol:121: if (newPrice < MIN_PRICE || newPrice > MAX_PRICE)
+    // MIN_PRICE in setPrice must succeed
+    uint128 minP = rebate.MIN_PRICE();
+    vm.prank(seller);
+    rebate.setPrice(id48, minP);
+    Rebate.Listing memory l = rebate.listingOf(id48);
+    assertEq(l.price, minP);
+
+    // 5. Kill Rebate.sol:272: if (count > MAX_PAGE) count = MAX_PAGE;
+    // count == 50 (MAX_PAGE) should fetch up to 50
+    vm.prank(alice);
+    rebate.buy{value: minP}(id48);
+    (uint256[] memory pids,,) = rebate.purchasesOf(id48, 0, 50);
+    assertEq(pids.length, 1);
+
+    // 6. Kill Rebate.sol:297: if (count > MAX_PAGE) count = MAX_PAGE in latest
+    (uint256[] memory latestIds,,) = rebate.latest(0, 50);
+    assertEq(latestIds.length, 3);
+  }
 }
