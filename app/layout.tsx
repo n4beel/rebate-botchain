@@ -1,12 +1,24 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Poppins, Nova_Mono } from "next/font/google";
 import { EvmProvider } from "@/components/providers/EvmProvider";
 import { ToastProvider } from "@/components/ui/Toast";
+import WrongNetworkBar from "@/components/botchain/WrongNetworkBar";
 import { app } from "@/lib/app-config";
 import "./globals.css";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"], display: "swap" });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"], display: "swap" });
+const poppins = Poppins({
+  variable: "--font-poppins",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const novaMono = Nova_Mono({
+  variable: "--font-nova-mono",
+  subsets: ["latin"],
+  weight: ["400"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: `${app.name} — ${app.tagline}`,
@@ -14,25 +26,25 @@ export const metadata: Metadata = {
   openGraph: { title: app.name, description: app.tagline, type: "website", url: app.url },
 };
 
-/** `width=device-width` plus a floor on zoom. Pinch-zoom stays available; nothing is locked out. */
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0A0A0A",
+  themeColor: "#F2F59B",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full`}
-      // The project's accent, written once at the root. Every component reads `var(--accent)`, so
-      // this is the only place a palette change has to happen.
+      className={`${poppins.variable} ${novaMono.variable} h-full`}
       style={{ ["--accent" as string]: app.accent }}
     >
-      <body className="min-h-full antialiased">
+      <body className="min-h-full antialiased flex flex-col font-sans">
         <EvmProvider>
-          <ToastProvider>{children}</ToastProvider>
+          <ToastProvider>
+            <WrongNetworkBar />
+            {children}
+          </ToastProvider>
         </EvmProvider>
       </body>
     </html>
