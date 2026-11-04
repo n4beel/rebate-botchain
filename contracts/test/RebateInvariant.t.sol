@@ -27,7 +27,7 @@ contract RebateHandler is Test {
     activeId = rebate.list("Handler Item", currentPrice, WINDOW, 500);
   }
 
-  function buy(uint256 buyerIdx) external {
+  function buyItem(uint256 buyerIdx) external {
     address b = buyers[buyerIdx % buyers.length];
     vm.prank(b);
     try rebate.buy{value: currentPrice}(activeId) returns (uint256 pid) {
