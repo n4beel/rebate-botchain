@@ -22,7 +22,7 @@ interface PageShellProps {
  * Features a top navigation banner and clean rack layout on warm yellow base.
  */
 export default function PageShell({ children, nav = [], title, description }: PageShellProps) {
-  const links = footerLinks();
+  const { site, explorer, contract } = footerLinks();
   const pathname = usePathname();
 
   return (
@@ -138,17 +138,32 @@ export default function PageShell({ children, nav = [], title, description }: Pa
           </div>
 
           <div className="flex items-center gap-4">
-            {links.map((link) => (
+            {contract && (
               <a
-                key={link.label}
-                href={link.href}
+                href={contract}
                 target="_blank"
                 rel="noreferrer"
                 className="hover:underline transition-colors hover:text-[var(--text-primary)]"
               >
-                {link.label}
+                Contract
               </a>
-            ))}
+            )}
+            <a
+              href={site}
+              target="_blank"
+              rel="noreferrer"
+              className="hover:underline transition-colors hover:text-[var(--text-primary)]"
+            >
+              BOT Chain
+            </a>
+            <a
+              href={explorer}
+              target="_blank"
+              rel="noreferrer"
+              className="hover:underline transition-colors hover:text-[var(--text-primary)]"
+            >
+              Explorer
+            </a>
           </div>
         </div>
       </footer>
